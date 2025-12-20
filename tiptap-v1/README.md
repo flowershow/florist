@@ -2,6 +2,12 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 ## Getting Started
 
+Run unit tests:
+
+```bash
+pnpm test
+```
+
 First, run the development server:
 
 ```bash
