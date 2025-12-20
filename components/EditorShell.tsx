@@ -8,6 +8,7 @@ import { CsvEmbed } from '../lib/tiptap/extensions/csvEmbed'
 import { createAssetRegistry } from '../lib/assets'
 import { parseCsvText } from '../lib/csv'
 import { serializeToMarkdown } from '../lib/serialization'
+import Toolbar from './Toolbar'
 
 const CustomImage = Image.extend({
     addAttributes() {
@@ -47,15 +48,9 @@ export default function EditorShell() {
         const files = Array.from(e.dataTransfer.files)
         for (const file of files) {
             if (file.type.startsWith('image/')) {
-                const url = URL.createObjectURL(file)
-                registry.register({
-                    filename: file.name,
-                    originalName: file.name,
-                    mime: file.type,
-                    url,
-                })
-                editor.chain().focus().setImage({ src: url, alt: file.name }).updateAttributes('image', { filename: file.name }).run()
+                handleImageSelect(file)
             } else if (file.type === 'text/csv' || file.name.endsWith('.csv')) {
+                // ... existing CSV logic ...
                 try {
                     const text = await file.text()
                     // Validate CSV
@@ -75,6 +70,18 @@ export default function EditorShell() {
             }
         }
     }, [editor, registry])
+
+    const handleImageSelect = (file: File) => {
+        if (!editor) return
+        const url = URL.createObjectURL(file)
+        registry.register({
+            filename: file.name,
+            originalName: file.name,
+            mime: file.type,
+            url,
+        })
+        editor.chain().focus().setImage({ src: url, alt: file.name }).updateAttributes('image', { filename: file.name }).run()
+    }
 
     const handleDragOver = (e: React.DragEvent) => {
         e.preventDefault()
@@ -127,6 +134,7 @@ export default function EditorShell() {
             </div>
 
             <div className="min-h-[500px]">
+                <Toolbar editor={editor} onImageSelect={handleImageSelect} />
                 <EditorContent editor={editor} />
             </div>
         </div>
