@@ -37,6 +37,7 @@ export default function EditorShell() {
             },
         },
         content: '',
+        immediatelyRender: false,
     })
 
     const handleDrop = useCallback(async (e: React.DragEvent) => {

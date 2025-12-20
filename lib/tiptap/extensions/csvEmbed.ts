@@ -14,7 +14,7 @@ export const CsvEmbed = Node.create({
     parseHTML() {
         return [{ tag: 'div[data-csv-embed]' }]
     },
-    renderHTML({ HTMLAttributes }) {
+    renderHTML({ HTMLAttributes }: { HTMLAttributes: Record<string, any> }) {
         return ['div', mergeAttributes(HTMLAttributes, { 'data-csv-embed': '' }), 0]
     }
 })
