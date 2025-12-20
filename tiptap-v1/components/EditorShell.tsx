@@ -6,6 +6,7 @@ import StarterKit from '@tiptap/starter-kit'
 import Image from '@tiptap/extension-image'
 import { createAssetRegistry } from '@/lib/assets'
 import { parseCsvText } from '@/lib/csv'
+import { serializeToMarkdown } from '@/lib/serialization'
 import { CsvEmbed } from '@/lib/tiptap/extensions/csvEmbed'
 
 type DraftPayload = {
@@ -103,6 +104,20 @@ export function EditorShell() {
 
   const hintVisible = !title && !subtitle && !hasContent
 
+  const handleContinue = () => {
+    if (!editor) return
+    const markdown = serializeToMarkdown({
+      title,
+      subtitle,
+      doc: editor.getJSON()
+    })
+    console.log('Draft markdown')
+    console.log(markdown)
+    console.log('Assets')
+    console.log(registryRef.current.list())
+    alert('Draft exported to console.')
+  }
+
   const handleDrop = async (event: React.DragEvent<HTMLDivElement>) => {
     if (!editor) return
     if (!event.dataTransfer?.files?.length) return
@@ -154,6 +169,11 @@ export function EditorShell() {
 
   return (
     <div className="editor-shell" onDrop={handleDrop} onDragOver={(event) => event.preventDefault()}>
+      <div className="editor-topbar">
+        <button className="continue-button" type="button" onClick={handleContinue}>
+          Continue
+        </button>
+      </div>
       <div className="editor-frame">
         <input
           className="editor-title"
