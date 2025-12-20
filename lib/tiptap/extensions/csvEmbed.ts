@@ -1,4 +1,6 @@
 import { Node, mergeAttributes } from '@tiptap/core'
+import { ReactNodeViewRenderer } from '@tiptap/react'
+import { CsvNodeView } from '../../../components/CsvNodeView'
 
 export const CsvEmbed = Node.create({
     name: 'csvEmbed',
@@ -16,5 +18,8 @@ export const CsvEmbed = Node.create({
     },
     renderHTML({ HTMLAttributes }: { HTMLAttributes: Record<string, any> }) {
         return ['div', mergeAttributes(HTMLAttributes, { 'data-csv-embed': '' }), 0]
+    },
+    addNodeView() {
+        return ReactNodeViewRenderer(CsvNodeView)
     }
 })

@@ -5,10 +5,10 @@ import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import Image from '@tiptap/extension-image'
 import { CsvEmbed } from '../lib/tiptap/extensions/csvEmbed'
-import { createAssetRegistry } from '../lib/assets'
 import { parseCsvText } from '../lib/csv'
 import { serializeToMarkdown } from '../lib/serialization'
 import Toolbar from './Toolbar'
+import { AssetProvider, useAssetRegistry } from './AssetContext'
 
 const CustomImage = Image.extend({
     addAttributes() {
@@ -22,9 +22,17 @@ const CustomImage = Image.extend({
 })
 
 export default function EditorShell() {
+    return (
+        <AssetProvider>
+            <EditorInner />
+        </AssetProvider>
+    )
+}
+
+function EditorInner() {
     const [title, setTitle] = useState('')
     const [subtitle, setSubtitle] = useState('')
-    const registry = useMemo(() => createAssetRegistry(), [])
+    const registry = useAssetRegistry()
 
     const editor = useEditor({
         extensions: [
