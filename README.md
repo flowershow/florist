@@ -1,4 +1,4 @@
-# FlowerPress 🌸
+# Florist 🌸
 
 A **Substack/Notion-style cloud editor for markdown-based [data-rich documents](https://datarichdocs.com/) and datasets** compatible with [Flowershow.app](https://flowershow.app).
 
