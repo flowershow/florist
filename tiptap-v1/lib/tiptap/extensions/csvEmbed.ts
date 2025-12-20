@@ -8,7 +8,13 @@ export const CsvEmbed = Node.create({
   draggable: true,
   addAttributes() {
     return {
-      filename: { default: '' }
+      filename: {
+        default: '',
+        parseHTML: (element) => element.getAttribute('data-filename'),
+        renderHTML: (attributes) => ({
+          'data-filename': attributes.filename
+        })
+      }
     }
   },
   parseHTML() {
