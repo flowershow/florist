@@ -46,6 +46,7 @@ export function EditorShell() {
 
   const editor = useEditor({
     extensions: [StarterKit, ImageWithFilename, CsvEmbed],
+    immediatelyRender: false,
     editorProps: {
       attributes: {
         class: 'editor-body'
