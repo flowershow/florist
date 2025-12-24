@@ -10,6 +10,14 @@ A minimal, Substack-style rich text editor built with [Next.js](https://nextjs.o
 - **CSV Handling**: Drag and drop CSV files to render them as interactive tables.
 - **Markdown Output**: Content is serialized to Markdown with frontmatter.
 
+## Github Editor
+
+The Github Editor flow allows you to:
+- **Direct Integration**: Log in with your GitHub account to browse organizations and repositories.
+- **Native Markdown**: Edit `README.md` files directly using the rich text interface.
+- **Cloud Storage**: Images and CSV files dropped into the editor are automatically committed to the repository in the same directory as the content.
+- **Portable Content**: Assets are referenced via relative paths, ensuring your repository remains portable and standard-compliant.
+
 ## Getting Started
 
 ### Prerequisites
