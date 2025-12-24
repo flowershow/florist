@@ -17,7 +17,7 @@ export const CsvEmbed = Node.create({
         return [{ tag: 'div[data-csv-embed]' }]
     },
     renderHTML({ HTMLAttributes }: { HTMLAttributes: Record<string, any> }) {
-        return ['div', mergeAttributes(HTMLAttributes, { 'data-csv-embed': '' }), 0]
+        return ['div', mergeAttributes(HTMLAttributes, { 'data-csv-embed': '' })]
     },
     addNodeView() {
         return ReactNodeViewRenderer(CsvNodeView)
