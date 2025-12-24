@@ -1,7 +1,7 @@
 import { auth } from "@/lib/auth"
 import RepoPicker from "@/components/RepoPicker"
 import GithubEditorShell from "@/components/GithubEditorShell"
-import { getReadme } from "./actions"
+import { getReadme } from "../actions"
 import Link from "next/link"
 
 export default async function Home(props: {
