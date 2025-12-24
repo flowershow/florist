@@ -17,16 +17,23 @@ function EditorShellInner() {
     const editorRef = useRef<DocumentEditorRef>(null)
     const [savedMarkdown, setSavedMarkdown] = useState<string | null>(null)
     const [isCopied, setIsCopied] = useState(false)
+    const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'success'>('idle')
 
     const handleSave = () => {
         if (!editorRef.current) return
+        setSaveStatus('saving')
+
         const content = editorRef.current.getData()
         const markdown = serializeToMarkdown({
             title: content.title,
             subtitle: content.subtitle,
             doc: content.doc,
         })
+
         setSavedMarkdown(markdown)
+        setSaveStatus('success')
+
+        setTimeout(() => setSaveStatus('idle'), 2000)
     }
 
     const handleCopy = () => {
@@ -45,33 +52,40 @@ function EditorShellInner() {
                 </div>
                 <button
                     onClick={handleSave}
-                    className="bg-black text-white px-6 py-2 rounded-full text-sm font-semibold hover:bg-gray-800 active:scale-95 transition-all shadow-sm"
+                    className={`px-6 py-2 rounded-full text-sm font-semibold transition-all shadow-sm active:scale-95 ${saveStatus === 'success'
+                            ? 'bg-green-500 text-white scale-105'
+                            : 'bg-black text-white hover:bg-gray-800'
+                        }`}
                 >
-                    Save
+                    {saveStatus === 'success' ? '✓ Saved!' : 'Save'}
                 </button>
             </header>
 
-            <DocumentEditor ref={editorRef} />
-
-            {/* Markdown Output Area */}
-            {savedMarkdown && (
-                <div className="max-w-3xl mx-auto w-full px-8 pb-24 mt-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                    <div className="bg-gray-50 rounded-[2rem] p-8 border border-gray-100 relative group">
-                        <div className="flex justify-between items-center mb-6">
-                            <h3 className="text-xs font-bold uppercase tracking-widest text-gray-400">Generated Markdown</h3>
-                            <button
-                                onClick={handleCopy}
-                                className="text-xs font-bold uppercase tracking-widest text-blue-600 hover:text-blue-800 transition-colors"
-                            >
-                                {isCopied ? 'Copied!' : 'Copy to Clipboard'}
-                            </button>
+            <div className="max-w-3xl mx-auto w-full">
+                {/* Markdown Output Area - Moved Above Editor */}
+                {savedMarkdown && (
+                    <div className="px-8 mt-4 animate-in fade-in slide-in-from-top-4 duration-500">
+                        <div className="bg-gray-50 rounded-2xl p-6 border border-gray-100 relative group">
+                            <div className="flex justify-between items-center mb-4">
+                                <h3 className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Generated Markdown</h3>
+                                <button
+                                    onClick={handleCopy}
+                                    className="text-[10px] font-bold uppercase tracking-widest text-blue-600 hover:text-blue-800 transition-colors"
+                                >
+                                    {isCopied ? 'Copied!' : 'Copy to Clipboard'}
+                                </button>
+                            </div>
+                            <div className="max-h-48 overflow-y-auto scrollbar-hide">
+                                <pre className="text-xs font-mono text-gray-700 whitespace-pre-wrap leading-relaxed">
+                                    {savedMarkdown}
+                                </pre>
+                            </div>
                         </div>
-                        <pre className="text-sm font-mono text-gray-700 whitespace-pre-wrap leading-relaxed">
-                            {savedMarkdown}
-                        </pre>
                     </div>
-                </div>
-            )}
+                )}
+
+                <DocumentEditor ref={editorRef} />
+            </div>
         </div>
     )
 }
