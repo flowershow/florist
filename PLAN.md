@@ -8,3 +8,14 @@ Build a minimal Next.js-based editor that feels like Substack: title and subtitl
 - [x] Improve CSV preview experience
 - [x] Markdown editing support e.g. `## title` converts to h2 title in tiptap - see https://tiptap.dev/docs/examples/basics/markdown-shortcuts
 - [ ] Loading markdown - see https://tiptap.dev/docs/editor/markdown
+
+## Full app (wrapped around the editor)
+
+- [ ] Login to github
+  - [ ] make sure to ask for permissions to write to repos ... (on relevant organizations)
+- [ ] Select org
+- [ ] Select repo
+- [ ] Automatically loads README.md (or prepares to write to that if no existing README.md)
+  - [ ] Files like images or CSVs are stored directly into github repo in same directory as README.md
+    - [ ] you will need to use the relevant API for saving ...
+  - [ ] Uploading should happen with a spinner or holding sign in the editor (bonus if we can show progress on uploading)

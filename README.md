@@ -1,4 +1,4 @@
-# Florist Antigravity Editor
+# Florist Editor
 
 A minimal, Substack-style rich text editor built with [Next.js](https://nextjs.org) and [Tiptap](https://tiptap.dev).
 
