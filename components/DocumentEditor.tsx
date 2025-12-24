@@ -43,7 +43,11 @@ export default function DocumentEditor({
 
     const editor = useEditor({
         extensions: [
-            StarterKit,
+            StarterKit.configure({
+                heading: {
+                    levels: [1, 2, 3, 4, 5, 6],
+                },
+            }),
             CustomImage,
             CsvEmbed
         ],
@@ -55,18 +59,18 @@ export default function DocumentEditor({
         content: initialContent?.doc || '',
         immediatelyRender: false,
     })
-    
+
     // Update local state if initialContent changes
     useEffect(() => {
         if (initialContent) {
             setTitle(initialContent.title || '')
             setSubtitle(initialContent.subtitle || '')
             if (editor && initialContent.doc) {
-                 // Only update if content is different to avoid cursor jumps or loops.
-                 // For simplified v1, we might skip deep comparison and assume initialContent is truly "initial".
-                 // But if we want to support external updates, we'd need more logic.
-                 // For now, let's respect the prop if it's provided on mount.
-                 // We won't force update the editor content on every render to avoid issues.
+                // Only update if content is different to avoid cursor jumps or loops.
+                // For simplified v1, we might skip deep comparison and assume initialContent is truly "initial".
+                // But if we want to support external updates, we'd need more logic.
+                // For now, let's respect the prop if it's provided on mount.
+                // We won't force update the editor content on every render to avoid issues.
             }
         }
     }, [initialContent, editor])
