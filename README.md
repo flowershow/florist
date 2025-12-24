@@ -1,36 +1,79 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Florist Antigravity Editor
+
+A minimal, Substack-style rich text editor built with [Next.js](https://nextjs.org) and [Tiptap](https://tiptap.dev).
+
+## Features
+
+- **Clean Interface**: Title and subtitle inputs with a centered writing experience.
+- **Rich Text**: Formatting controls via a sticky toolbar (Bold, Italic, Headings, Lists, etc.).
+- **Media Support**: Drag and drop images directly into the editor.
+- **CSV Handling**: Drag and drop CSV files to render them as interactive tables.
+- **Markdown Output**: Content is serialized to Markdown with frontmatter.
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+
+- Node.js
+- [pnpm](https://pnpm.io/) (preferred package manager)
+
+### Installation
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+pnpm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Running Locally
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Start the development server:
+```bash
+pnpm dev
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-## Learn More
+## Developer Guide
 
-To learn more about Next.js, take a look at the following resources:
+### Architecture
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+This project uses **Next.js 16 (App Router)** primarily as a wrapper to serve the React-based editor application.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- **Stack**: Next.js, React 19, Tailwind CSS, Tiptap.
+- **Core Components**:
+  - `components/EditorShell.tsx`: The main container managing the editor state, title/subtitle, and drag-and-drop logic.
+  - `components/Toolbar.tsx`: The formatting toolbar.
+  - `components/CsvNodeView.tsx`: Custom Node View for rendering CSV data files using `papaparse`.
+- **State Management**:
+  - `lib/assets.ts` & `components/AssetContext.tsx`: Manages an in-memory registry of dropped files (images/CSVs) to simulate local asset handling.
+- **Serialization**:
+  - `lib/serialization.ts`: Handles converting the editor state back to Markdown + Frontmatter.
 
-## Deploy on Vercel
+### Key Directory Structure
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```
+├── app/                  # Next.js App Router pages
+│   └── page.tsx          # Renders <EditorShell />
+├── components/           # React components (Editor, Toolbar, etc.)
+├── lib/                  # Utilities (CSV parsing, serialization)
+├── PLAN.md               # Original implementation plan and requirements
+└── public/               # Static assets
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Contributing
+
+1. Fork and clone the repository.
+2. Install dependencies: `pnpm install`.
+3. Make your changes.
+4. Verify changes by running `pnpm dev`.
+
+## AI Agent Context
+
+Use this section to quickly understand the project context if you are an AI agent picking up this task.
+
+- **Goal**: Create a high-quality, "Substack-like" writing environment.
+- **Current State**: The editor acts as a Single Page Application (SPA) embedded in Next.js.
+- **Key Constraints**: 
+  - Styling uses Tailwind CSS.
+  - No external database (currently in-memory only for demo).
+  - Assets are handled via `AssetContext`.
+- **References**: See `PLAN.md` for the detailed feature checklist and implementation steps.
