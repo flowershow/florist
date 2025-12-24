@@ -40,6 +40,29 @@ pnpm dev
 
 Open [http://localhost:3000](http://localhost:3000) in your browser.
 
+## GitHub Integration Setup
+
+To use the **GitHub Editor** flow, you need to configure an OAuth App on GitHub.
+
+1. **Create an OAuth App**:
+   - Go to your GitHub [Developer Settings](https://github.com/settings/developers).
+   - Click **New OAuth App**.
+   - **Homepage URL**: `http://localhost:3000`
+   - **Authorization callback URL**: `http://localhost:3000/api/auth/callback/github`
+2. **Configure Environment Variables**:
+   - Create a `.env.local` file in the root directory.
+   - Add the following variables:
+     ```env
+     # Run `npx auth secret` or `openssl rand -base64 32` to generate
+     AUTH_SECRET="your-auth-secret"
+
+     AUTH_GITHUB_ID="your-client-id"
+     AUTH_GITHUB_SECRET="your-client-secret"
+     ```
+
+> [!NOTE]
+> The application requests the `repo` scope to allow editing READMEs and committing assets. Ensure you approve these permissions when signing in.
+
 ## Developer Guide
 
 ### Architecture
