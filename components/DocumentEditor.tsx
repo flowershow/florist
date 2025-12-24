@@ -4,6 +4,7 @@ import { useState, useCallback, useEffect } from 'react'
 import { useEditor, EditorContent, type JSONContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import Image from '@tiptap/extension-image'
+import { Markdown } from 'tiptap-markdown'
 import { CsvEmbed } from '../lib/tiptap/extensions/csvEmbed'
 import { parseCsvText } from '../lib/csv'
 import Toolbar from './Toolbar'
@@ -23,22 +24,25 @@ const CustomImage = Image.extend({
 export type DocumentContent = {
     title: string
     subtitle: string
-    doc: JSONContent
+    doc?: JSONContent | string // Support both JSON and Markdown string
 }
 
 interface DocumentEditorProps {
     initialContent?: DocumentContent | null
     onSave?: (content: DocumentContent) => void
+    onFileUpload?: (file: File) => Promise<string>
     className?: string
 }
 
 export default function DocumentEditor({
     initialContent,
     onSave,
+    onFileUpload,
     className = ''
 }: DocumentEditorProps) {
     const [title, setTitle] = useState(initialContent?.title || '')
     const [subtitle, setSubtitle] = useState(initialContent?.subtitle || '')
+    const [isUploading, setIsUploading] = useState(false)
     const registry = useAssetRegistry()
 
     const editor = useEditor({
@@ -47,6 +51,14 @@ export default function DocumentEditor({
                 heading: {
                     levels: [1, 2, 3, 4, 5, 6],
                 },
+            }),
+            Markdown.configure({
+                html: true,
+                tightLists: true,
+                tightListClass: 'tight',
+                bulletListMarker: '-',
+                linkify: true,
+                breaks: true,
             }),
             CustomImage,
             CsvEmbed
@@ -66,11 +78,7 @@ export default function DocumentEditor({
             setTitle(initialContent.title || '')
             setSubtitle(initialContent.subtitle || '')
             if (editor && initialContent.doc) {
-                // Only update if content is different to avoid cursor jumps or loops.
-                // For simplified v1, we might skip deep comparison and assume initialContent is truly "initial".
-                // But if we want to support external updates, we'd need more logic.
-                // For now, let's respect the prop if it's provided on mount.
-                // We won't force update the editor content on every render to avoid issues.
+                editor.commands.setContent(initialContent.doc)
             }
         }
     }, [initialContent, editor])
@@ -85,37 +93,70 @@ export default function DocumentEditor({
             if (file.type.startsWith('image/')) {
                 handleImageSelect(file)
             } else if (file.type === 'text/csv' || file.name.endsWith('.csv')) {
-                try {
-                    const text = await file.text()
-                    // Validate CSV
-                    const parsed = parseCsvText(text)
-                    const url = URL.createObjectURL(file)
-                    registry.register({
-                        filename: file.name,
-                        originalName: file.name,
-                        mime: file.type,
-                        url,
-                        parsed
-                    })
-                    editor.chain().focus().insertContent({ type: 'csvEmbed', attrs: { filename: file.name } }).run()
-                } catch (err) {
-                    console.error('Failed to parse CSV', err)
-                }
+                handleCsvSelect(file)
             }
         }
-    }, [editor, registry])
+    }, [editor])
 
-    const handleImageSelect = (file: File) => {
+    const handleImageSelect = async (file: File) => {
         if (!editor) return
-        const url = URL.createObjectURL(file)
-        registry.register({
-            filename: file.name,
-            originalName: file.name,
-            mime: file.type,
-            url,
-            parsed: undefined
-        })
+
+        let url = URL.createObjectURL(file)
+
+        if (onFileUpload) {
+            setIsUploading(true)
+            try {
+                url = await onFileUpload(file)
+            } catch (err) {
+                console.error("Upload failed", err)
+                return
+            } finally {
+                setIsUploading(false)
+            }
+        } else {
+            // Local fallback
+            registry.register({
+                filename: file.name,
+                originalName: file.name,
+                mime: file.type,
+                url,
+                parsed: undefined
+            })
+        }
+
         editor.chain().focus().setImage({ src: url, alt: file.name }).updateAttributes('image', { filename: file.name }).run()
+    }
+
+    const handleCsvSelect = async (file: File) => {
+        if (!editor) return
+
+        try {
+            const text = await file.text()
+            // Validate CSV
+            const parsed = parseCsvText(text)
+            let url = URL.createObjectURL(file)
+
+            if (onFileUpload) {
+                setIsUploading(true)
+                try {
+                    url = await onFileUpload(file)
+                } finally {
+                    setIsUploading(false)
+                }
+            } else {
+                registry.register({
+                    filename: file.name,
+                    originalName: file.name,
+                    mime: file.type,
+                    url,
+                    parsed
+                })
+            }
+
+            editor.chain().focus().insertContent({ type: 'csvEmbed', attrs: { filename: file.name } }).run()
+        } catch (err) {
+            console.error('Failed to parse CSV', err)
+        }
     }
 
     const handleDragOver = (e: React.DragEvent) => {
@@ -127,40 +168,48 @@ export default function DocumentEditor({
         onSave({
             title,
             subtitle,
-            doc: editor.getJSON()
+            // @ts-expect-error - getMarkdown is added by Markdown extension
+            doc: editor.getMarkdown()
         })
     }
 
     return (
         <div
-            className={`min-h-screen p-8 max-w-3xl mx-auto ${className}`}
+            className={`min-h-screen p-8 max-w-3xl mx-auto relative ${className}`}
             onDrop={handleDrop}
             onDragOver={handleDragOver}
         >
+            {isUploading && (
+                <div className="fixed top-20 right-8 bg-white shadow-xl border border-gray-100 rounded-lg p-4 flex items-center gap-3 z-50 transition-all animate-in fade-in slide-in-from-top-4">
+                    <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
+                    <span className="text-sm font-semibold text-gray-800">Uploading to GitHub...</span>
+                </div>
+            )}
+
             <header className="mb-8 flex justify-between items-center">
-                <div className="text-sm text-gray-500">Draft</div>
+                <div className="text-sm text-gray-500 font-medium">Draft</div>
                 {onSave && (
                     <button
                         onClick={handleSaveClick}
-                        className="bg-black text-white px-4 py-2 rounded-full text-sm font-medium hover:bg-gray-800 transition-colors"
+                        className="bg-black text-white px-6 py-2 rounded-full text-sm font-semibold hover:bg-gray-800 active:scale-95 transition-all shadow-sm"
                     >
                         Save
                     </button>
                 )}
             </header>
 
-            <div className="mb-8 space-y-4">
+            <div className="mb-12 space-y-4">
                 <input
                     type="text"
                     placeholder="Title"
-                    className="w-full text-4xl font-bold border-none outline-none placeholder-gray-300"
+                    className="w-full text-5xl font-extrabold border-none outline-none placeholder-gray-200 tracking-tight"
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
                 />
                 <input
                     type="text"
                     placeholder="Subtitle"
-                    className="w-full text-xl text-gray-600 border-none outline-none placeholder-gray-300"
+                    className="w-full text-2xl text-gray-500 font-medium border-none outline-none placeholder-gray-200"
                     value={subtitle}
                     onChange={(e) => setSubtitle(e.target.value)}
                 />
