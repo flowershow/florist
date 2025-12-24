@@ -126,20 +126,33 @@ export async function uploadAsset(owner: string, repo: string, filename: string,
     const file = formData.get('file') as File
     if (!file) throw new Error("No file provided")
 
-    const timestamp = Date.now()
-    const uniqueFilename = `${timestamp}-${filename}`
-
     const buffer = await file.arrayBuffer()
     const contentBase64 = Buffer.from(buffer).toString('base64')
 
     const octokit = getOctokit(session.accessToken as string)
 
+    // Check if file exists to get its SHA (required for overwriting)
+    let sha: string | undefined
+    try {
+        const { data } = await octokit.rest.repos.getContent({
+            owner,
+            repo,
+            path: filename,
+        })
+        if (!Array.isArray(data) && 'sha' in data) {
+            sha = data.sha
+        }
+    } catch (e) {
+        // Ignore errors (file likely doesn't exist)
+    }
+
     const { data } = await octokit.rest.repos.createOrUpdateFileContents({
         owner,
         repo,
-        path: uniqueFilename, // Root directory
+        path: filename,
         message: `Upload ${filename}`,
-        content: contentBase64
+        content: contentBase64,
+        sha
     })
 
     // data.content can be null in some cases, so use optional chaining
