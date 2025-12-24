@@ -47,8 +47,8 @@ To use the **GitHub Editor** flow, you need to configure an OAuth App on GitHub.
 1. **Create an OAuth App**:
    - Go to your GitHub [Developer Settings](https://github.com/settings/developers).
    - Click **New OAuth App**.
-   - **Homepage URL**: `http://localhost:3000`
-   - **Authorization callback URL**: `http://localhost:3000/api/auth/callback/github`
+   - **Homepage URL**: `http://localhost:3000` (or your production domain)
+   - **Authorization callback URL**: `http://localhost:3000/api/auth/callback/github` (adjust the domain to match your environment)
 2. **Configure Environment Variables**:
    - Create a `.env.local` file in the root directory.
    - Add the following variables:

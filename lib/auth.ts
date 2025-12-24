@@ -2,6 +2,7 @@ import NextAuth, { type NextAuthConfig } from "next-auth"
 import GitHub from "next-auth/providers/github"
 
 export const authConfig = {
+    trustHost: true,
     providers: [
         GitHub({
             authorization: { params: { scope: "repo" } }, // Request full repo access
