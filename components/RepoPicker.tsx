@@ -31,7 +31,7 @@ export default function RepoPicker() {
     const handleRepoSelect = (repo: string) => {
         if (!selectedAccount) return
         // Navigate to ?owner=X&repo=Y
-        router.push(`/?owner=${selectedAccount}&repo=${repo}`)
+        router.push(`/github?owner=${selectedAccount}&repo=${repo}`)
     }
 
     return (
