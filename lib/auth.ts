@@ -15,8 +15,7 @@ export const authConfig = {
             return token
         },
         async session({ session, token }) {
-            // @ts-expect-error - accessToken is not typed in default session
-            session.accessToken = token.accessToken
+            session.accessToken = token.accessToken as string
             return session
         },
     },

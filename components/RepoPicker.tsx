@@ -16,8 +16,7 @@ export default function RepoPicker() {
 
     useEffect(() => {
         fetchOrgs().then(data => {
-            // @ts-expect-error - types are loose
-            setAccounts(data)
+            setAccounts(data as any)
         })
     }, [])
 
@@ -25,8 +24,7 @@ export default function RepoPicker() {
         setSelectedAccount(login)
         setLoading(true)
         const data = await fetchRepos(login)
-        // @ts-expect-error - types are loose
-        setRepos(data)
+        setRepos(data as any)
         setLoading(false)
     }
 

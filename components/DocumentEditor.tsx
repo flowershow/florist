@@ -168,8 +168,7 @@ export default function DocumentEditor({
         onSave({
             title,
             subtitle,
-            // @ts-expect-error - getMarkdown is added by Markdown extension
-            doc: editor.getMarkdown()
+            doc: (editor as any).getMarkdown()
         })
     }
 

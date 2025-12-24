@@ -1,7 +1,7 @@
 export type SerializeInput = {
     title: string
     subtitle: string
-    doc: Record<string, unknown>
+    doc?: any // Using any to handle JSONContent | string | undefined to avoid complex Tiptap imports here
 }
 
 export function serializeToMarkdown({ title, subtitle, doc }: SerializeInput) {
@@ -12,6 +12,12 @@ export function serializeToMarkdown({ title, subtitle, doc }: SerializeInput) {
         '---',
         ''
     ].join('\n')
+
+    if (!doc) return frontmatter
+
+    if (typeof doc === 'string') {
+        return `${frontmatter}${doc}`.trim() + '\n'
+    }
 
     const body = serializeNode(doc)
     return `${frontmatter}${body}`.trim() + '\n'

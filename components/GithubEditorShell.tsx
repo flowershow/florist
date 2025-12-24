@@ -33,7 +33,6 @@ export default function GithubEditorShell({
         const markdown = serializeToMarkdown({
             title: content.title,
             subtitle: content.subtitle,
-            // @ts-expect-error - serializeToMarkdown expects Record, getJSON returns JSONContent
             doc: content.doc
         })
 

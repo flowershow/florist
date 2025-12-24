@@ -5,10 +5,8 @@ import { getOctokit } from "@/lib/github"
 
 export async function fetchOrgs() {
     const session = await auth()
-    // @ts-expect-error - session type extension
     if (!session?.accessToken) return []
 
-    // @ts-expect-error - session type extension
     const octokit = getOctokit(session.accessToken as string)
     try {
         // Get user's own profile and orgs
@@ -27,10 +25,8 @@ export async function fetchOrgs() {
 
 export async function fetchRepos(org: string) {
     const session = await auth()
-    // @ts-expect-error - session type extension
     if (!session?.accessToken) return []
 
-    // @ts-expect-error - session type extension
     const octokit = getOctokit(session.accessToken as string)
     try {
         // If org is the authenticated user, list their repos
@@ -60,10 +56,8 @@ export async function fetchRepos(org: string) {
 
 export async function getReadme(owner: string, repo: string) {
     const session = await auth()
-    // @ts-expect-error - session type extension
     if (!session?.accessToken) return null
 
-    // @ts-expect-error - session type extension
     const octokit = getOctokit(session.accessToken as string)
     try {
         // Try getting README.md
@@ -93,10 +87,8 @@ export async function getReadme(owner: string, repo: string) {
 
 export async function saveReadme(owner: string, repo: string, content: string, message: string = "Update README.md") {
     const session = await auth()
-    // @ts-expect-error - session type extension
     if (!session?.accessToken) throw new Error("Unauthorized")
 
-    // @ts-expect-error - session type extension
     const octokit = getOctokit(session.accessToken as string)
 
     // Get current SHA to update
@@ -107,9 +99,9 @@ export async function saveReadme(owner: string, repo: string, content: string, m
             repo,
             path: 'README.md'
         })
-        // @ts-expect-error - loose typing on octokit response
-        if (!Array.isArray(data) && data.sha) {
-            // @ts-expect-error - loose typing
+
+        // Use type guard to handle the union type from getContent
+        if (!Array.isArray(data) && 'sha' in data) {
             sha = data.sha
         }
     } catch { }
@@ -129,22 +121,17 @@ export async function saveReadme(owner: string, repo: string, content: string, m
 
 export async function uploadAsset(owner: string, repo: string, filename: string, formData: FormData) {
     const session = await auth()
-    // @ts-expect-error - session type extension
     if (!session?.accessToken) throw new Error("Unauthorized")
 
     const file = formData.get('file') as File
     if (!file) throw new Error("No file provided")
 
-    // We can't easily get SHA for unique filenames unless we check first.
-    // For now, assume unique or overwrite.
-    // Better: prefix with timestamp?
     const timestamp = Date.now()
     const uniqueFilename = `${timestamp}-${filename}`
 
     const buffer = await file.arrayBuffer()
     const contentBase64 = Buffer.from(buffer).toString('base64')
 
-    // @ts-expect-error - session type extension
     const octokit = getOctokit(session.accessToken as string)
 
     const { data } = await octokit.rest.repos.createOrUpdateFileContents({
@@ -155,6 +142,6 @@ export async function uploadAsset(owner: string, repo: string, filename: string,
         content: contentBase64
     })
 
-    // @ts-expect-error - loose typing
-    return data.content?.download_url || ""
+    // data.content can be null in some cases, so use optional chaining
+    return (data as any).content?.download_url || ""
 }
