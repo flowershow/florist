@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useEffect, forwardRef, useImperativeHandle } from 'react'
 import { useEditor, EditorContent, type JSONContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import Image from '@tiptap/extension-image'
@@ -27,19 +27,21 @@ export type DocumentContent = {
     doc?: JSONContent | string // Support both JSON and Markdown string
 }
 
+export interface DocumentEditorRef {
+    getData: () => DocumentContent
+}
+
 interface DocumentEditorProps {
     initialContent?: DocumentContent | null
-    onSave?: (content: DocumentContent) => void
     onFileUpload?: (file: File) => Promise<string>
     className?: string
 }
 
-export default function DocumentEditor({
+const DocumentEditor = forwardRef<DocumentEditorRef, DocumentEditorProps>(({
     initialContent,
-    onSave,
     onFileUpload,
     className = ''
-}: DocumentEditorProps) {
+}, ref) => {
     const [title, setTitle] = useState(initialContent?.title || '')
     const [subtitle, setSubtitle] = useState(initialContent?.subtitle || '')
     const [isUploading, setIsUploading] = useState(false)
@@ -71,6 +73,16 @@ export default function DocumentEditor({
         content: initialContent?.doc || '',
         immediatelyRender: false,
     })
+
+    // Expose data via ref
+    useImperativeHandle(ref, () => ({
+        getData: () => ({
+            title,
+            subtitle,
+            // @ts-expect-error - getMarkdown is added by Markdown extension
+            doc: editor?.getMarkdown() || ''
+        })
+    }), [title, subtitle, editor])
 
     // Update local state if initialContent changes
     useEffect(() => {
@@ -163,15 +175,6 @@ export default function DocumentEditor({
         e.preventDefault()
     }
 
-    const handleSaveClick = () => {
-        if (!editor || !onSave) return
-        onSave({
-            title,
-            subtitle,
-            doc: (editor as any).getMarkdown()
-        })
-    }
-
     return (
         <div
             className={`min-h-screen p-8 max-w-3xl mx-auto relative ${className}`}
@@ -181,23 +184,11 @@ export default function DocumentEditor({
             {isUploading && (
                 <div className="fixed top-20 right-8 bg-white shadow-xl border border-gray-100 rounded-lg p-4 flex items-center gap-3 z-50 transition-all animate-in fade-in slide-in-from-top-4">
                     <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
-                    <span className="text-sm font-semibold text-gray-800">Uploading to GitHub...</span>
+                    <span className="text-sm font-semibold text-gray-800">Uploading...</span>
                 </div>
             )}
 
-            <header className="mb-8 flex justify-between items-center">
-                <div className="text-sm text-gray-500 font-medium">Draft</div>
-                {onSave && (
-                    <button
-                        onClick={handleSaveClick}
-                        className="bg-black text-white px-6 py-2 rounded-full text-sm font-semibold hover:bg-gray-800 active:scale-95 transition-all shadow-sm"
-                    >
-                        Save
-                    </button>
-                )}
-            </header>
-
-            <div className="mb-12 space-y-4">
+            <div className="mb-12 space-y-4 pt-12">
                 <input
                     type="text"
                     placeholder="Title"
@@ -220,4 +211,8 @@ export default function DocumentEditor({
             </div>
         </div>
     )
-}
+})
+
+DocumentEditor.displayName = 'DocumentEditor'
+
+export default DocumentEditor

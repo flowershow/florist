@@ -1,14 +1,17 @@
 export type SerializeInput = {
     title: string
     subtitle: string
-    doc?: any // Using any to handle JSONContent | string | undefined to avoid complex Tiptap imports here
+    doc?: any
 }
 
 export function serializeToMarkdown({ title, subtitle, doc }: SerializeInput) {
+    const escapedTitle = (title || '').replace(/"/g, '\\"')
+    const escapedSubtitle = (subtitle || '').replace(/"/g, '\\"')
+
     const frontmatter = [
         '---',
-        `title: "${title}"`,
-        `subtitle: "${subtitle}"`,
+        `title: "${escapedTitle}"`,
+        `subtitle: "${escapedSubtitle}"`,
         '---',
         ''
     ].join('\n')
@@ -16,11 +19,11 @@ export function serializeToMarkdown({ title, subtitle, doc }: SerializeInput) {
     if (!doc) return frontmatter
 
     if (typeof doc === 'string') {
-        return `${frontmatter}${doc}`.trim() + '\n'
+        return `${frontmatter}${doc.trim()}\n`
     }
 
     const body = serializeNode(doc)
-    return `${frontmatter}${body}`.trim() + '\n'
+    return `${frontmatter}${body.trim()}\n`
 }
 
 function serializeNode(node: any): string {
