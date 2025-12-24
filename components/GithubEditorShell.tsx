@@ -62,7 +62,7 @@ export default function GithubEditorShell({
     }
 
     return (
-        <AssetProvider>
+        <AssetProvider repoInfo={{ owner, repo }}>
             <div className="flex flex-col min-h-screen bg-white">
                 {/* External Header with Breadcrumbs and Save */}
                 <header className="max-w-3xl mx-auto w-full px-8 pt-8 flex justify-between items-center sticky top-0 bg-white/80 backdrop-blur-md z-20 pb-4 border-b border-gray-50">

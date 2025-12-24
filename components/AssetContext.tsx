@@ -1,21 +1,24 @@
 'use client'
 
 import { createContext, useContext, useState, ReactNode, useCallback } from 'react'
-import { createAssetRegistry, type Asset } from '../lib/assets'
-
-// We need a wrapper to make the registry reactive or just expose methods that force update
-// Since createAssetRegistry is just a map wrapper, we can just use a React state map
-// or ref+forceUpdate. React state based map is easier.
+import { type Asset } from '../lib/assets'
 
 type AssetContextType = {
     register: (asset: Asset) => void
     get: (filename: string) => Asset | undefined
     list: () => Asset[]
+    repoInfo?: { owner: string; repo: string }
 }
 
 const AssetContext = createContext<AssetContextType | null>(null)
 
-export function AssetProvider({ children }: { children: ReactNode }) {
+export function AssetProvider({
+    children,
+    repoInfo
+}: {
+    children: ReactNode,
+    repoInfo?: { owner: string; repo: string }
+}) {
     const [assets, setAssets] = useState<Map<string, Asset>>(new Map())
 
     const register = useCallback((asset: Asset) => {
@@ -35,7 +38,7 @@ export function AssetProvider({ children }: { children: ReactNode }) {
     }, [assets])
 
     return (
-        <AssetContext.Provider value={{ register, get, list }}>
+        <AssetContext.Provider value={{ register, get, list, repoInfo }}>
             {children}
         </AssetContext.Provider>
     )

@@ -145,3 +145,25 @@ export async function uploadAsset(owner: string, repo: string, filename: string,
     // data.content can be null in some cases, so use optional chaining
     return (data as any).content?.download_url || ""
 }
+
+export async function getFileContent(owner: string, repo: string, path: string) {
+    const session = await auth()
+    if (!session?.accessToken) throw new Error("Unauthorized")
+
+    const octokit = getOctokit(session.accessToken as string)
+    try {
+        const { data } = await octokit.rest.repos.getContent({
+            owner,
+            repo,
+            path,
+            mediaType: {
+                format: 'raw'
+            }
+        })
+        return data as unknown as string
+    } catch (e: any) {
+        if (e.status === 404) return null
+        console.error(`Failed to fetch file: ${path}`, e)
+        return null
+    }
+}

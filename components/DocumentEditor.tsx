@@ -115,6 +115,14 @@ const DocumentEditor = forwardRef<DocumentEditorRef, DocumentEditorProps>(({
         let url = URL.createObjectURL(file)
 
         if (onFileUpload) {
+            // Register locally first so UI updates immediately
+            registry.register({
+                filename: file.name,
+                originalName: file.name,
+                mime: file.type,
+                url,
+                parsed: undefined
+            })
             setIsUploading(true)
             try {
                 url = await onFileUpload(file)
@@ -148,6 +156,14 @@ const DocumentEditor = forwardRef<DocumentEditorRef, DocumentEditorProps>(({
             let url = URL.createObjectURL(file)
 
             if (onFileUpload) {
+                // Register locally first so UI updates immediately
+                registry.register({
+                    filename: file.name,
+                    originalName: file.name,
+                    mime: file.type,
+                    url,
+                    parsed
+                })
                 setIsUploading(true)
                 try {
                     url = await onFileUpload(file)
