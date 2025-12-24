@@ -79,8 +79,7 @@ const DocumentEditor = forwardRef<DocumentEditorRef, DocumentEditorProps>(({
         getData: () => ({
             title,
             subtitle,
-            // @ts-expect-error - getMarkdown is added by Markdown extension
-            doc: editor?.getMarkdown() || ''
+            doc: (editor as any)?.storage?.markdown?.getMarkdown?.() || ''
         })
     }), [title, subtitle, editor])
 
